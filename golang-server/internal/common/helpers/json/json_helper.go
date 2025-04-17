@@ -13,6 +13,12 @@ type ErrorResponse struct {
 	Context any    `json:"context"`
 }
 
+func ParseJson[T any](r *http.Request) (T, error) {
+	var t T
+	err := json.NewDecoder(r.Body).Decode(&t)
+	return t, err
+}
+
 func RespondJsonError(err interfaces.ApplicationError, w http.ResponseWriter) {
 	statusError := map[application_error.ErrorType]int{
 		application_error.BusinessError:   http.StatusUnprocessableEntity,
@@ -47,4 +53,9 @@ func RespondJsonResourceSuccess[T any](mapper interfaces.ResourceMapper[T], w ht
 
 	jsonResponse, _ := json.Marshal(mapper.ToResource())
 	w.Write(jsonResponse)
+}
+
+func RespondSuccess(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }

@@ -8,9 +8,10 @@ import (
 	auth_store_data "rz-server/internal/app/user/infra/store/sql/auth/data"
 	user_store_data "rz-server/internal/app/user/infra/store/sql/user/data"
 	"rz-server/internal/common/errors/application_error"
+	"rz-server/internal/common/interfaces"
 )
 
-func (s *AuthService) Register(command auth_commands.RegisterUserCommand) (*auth_data.AuthData, *application_error.Error) {
+func (s *AuthService) Register(command auth_commands.RegisterUserCommand) (*auth_data.AuthData, interfaces.ApplicationError) {
 	user := s.userStore.GetUserByEmail(command.Email)
 
 	fmt.Println("HH", user)
@@ -19,11 +20,11 @@ func (s *AuthService) Register(command auth_commands.RegisterUserCommand) (*auth
 		return nil, s.errors.New(auth_errors.USER_ALREADY_EXISTS)
 	}
 
-	hashedPassword, _ := s.auth.HashPassword(command.Password)
+	hashedPassword, err := s.auth.HashPassword(command.Password)
 
-	// if err != nil {
-	// return nil, err
-	// }
+	if err != nil {
+		return nil, s.errors.New(auth_errors.HASH_PASSWORD_FAILED)
+	}
 
 	newUser := s.userStore.CreateUser(user_store_data.CreateUserBody{
 		Email:       command.Email,
@@ -31,15 +32,15 @@ func (s *AuthService) Register(command auth_commands.RegisterUserCommand) (*auth
 		DisplayName: command.DisplayName,
 	})
 
-	// if newUser == nil {
-	// return nil, errors.New("failed to create user")
-	// }
+	if newUser == nil {
+		return nil, s.errors.New(application_error.STORE_SQL_ERROR)
+	}
 
-	refreshToken, expiredAt, _ := s.auth.GenerateRefreshToken(newUser.Id)
+	refreshToken, expiredAt, err := s.auth.GenerateRefreshToken(newUser.Id)
 
-	// if err != nil {
-	// return nil, err
-	// }
+	if err != nil {
+		return nil, s.errors.New(auth_errors.TOKEN_GENERATION_FAILED)
+	}
 
 	s.authStore.SaveRefreshToken(auth_store_data.RefreshTokenBody{
 		UserID:    newUser.Id,
@@ -47,12 +48,11 @@ func (s *AuthService) Register(command auth_commands.RegisterUserCommand) (*auth
 		ExpiredAt: expiredAt,
 	})
 
-	// accessToken, err := s.auth.GenerateAccessToken(newUser.Id)
-	accessToken, _ := s.auth.GenerateAccessToken(newUser.Id)
+	accessToken, err := s.auth.GenerateAccessToken(newUser.Id)
 
-	// if err != nil {
-	// return nil, err
-	// }
+	if err != nil {
+		return nil, s.errors.New(auth_errors.TOKEN_GENERATION_FAILED)
+	}
 
 	return &auth_data.AuthData{
 		RefreshToken: refreshToken,
