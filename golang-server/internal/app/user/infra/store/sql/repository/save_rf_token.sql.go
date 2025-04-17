@@ -20,7 +20,7 @@ VALUES (
     $2,
     $3
 )
-RETURNING id, user_id, token, expired_at
+RETURNING id, user_id, token, expired_at, created_at, updated_at
 `
 
 type SaveRefreshTokenParams struct {
@@ -37,6 +37,8 @@ func (q *Queries) SaveRefreshToken(ctx context.Context, arg SaveRefreshTokenPara
 		&i.UserID,
 		&i.Token,
 		&i.ExpiredAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

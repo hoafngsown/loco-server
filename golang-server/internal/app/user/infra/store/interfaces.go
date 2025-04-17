@@ -19,4 +19,8 @@ type AuthStore interface {
 type UserStore interface {
 	GetUserByEmail(email string) *user_store_data.Data
 	CreateUser(body user_store_data.CreateUserBody) *user_store_data.Data
+
+	// SavePreference(id uuid.UUID, preferences json.RawMessage) *user_store_data.Data
+	// GetSetupState(id uuid.UUID)
+	// GetPreferenceMetadata()
 }

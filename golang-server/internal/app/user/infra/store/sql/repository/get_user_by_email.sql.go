@@ -7,6 +7,8 @@ package repository
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const getUserByEmail = `-- name: GetUserByEmail :one
@@ -16,9 +18,16 @@ WHERE email = $1
 LIMIT 1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+type GetUserByEmailRow struct {
+	ID          uuid.UUID
+	Email       string
+	Password    string
+	DisplayName string
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
-	var i User
+	var i GetUserByEmailRow
 	err := row.Scan(
 		&i.ID,
 		&i.Email,

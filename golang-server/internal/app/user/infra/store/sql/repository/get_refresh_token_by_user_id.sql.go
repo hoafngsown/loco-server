@@ -7,6 +7,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -18,9 +19,16 @@ WHERE user_id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetRefreshTokenByUserID(ctx context.Context, userID uuid.UUID) (RefreshToken, error) {
+type GetRefreshTokenByUserIDRow struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Token     string
+	ExpiredAt time.Time
+}
+
+func (q *Queries) GetRefreshTokenByUserID(ctx context.Context, userID uuid.UUID) (GetRefreshTokenByUserIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getRefreshTokenByUserID, userID)
-	var i RefreshToken
+	var i GetRefreshTokenByUserIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
