@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Navigate to the root directory of the project
+CURRENT_DIR=$(pwd)
+
+echo "Building seed script..."
+cd $CURRENT_DIR
+go build -o bin/seed_preferences scripts/seed_preferences.go
+
+echo "Running seed script..."
+./bin/seed_preferences
+
+echo "Seeding completed!" 
