@@ -12,7 +12,7 @@ import (
 type AuthApi struct {
 	service application.AuthService
 	util    *interfaces.Util
-	server  interfaces.Server
+	*AuthRouting
 }
 
 func New(
@@ -23,16 +23,16 @@ func New(
 	u := new(AuthApi)
 	u.service = service
 	u.util = util
-	u.server = server
+	u.AuthRouting = NewRoutingSetup(server, util, service)
 
 	return u
 }
 
 func (u *AuthApi) Register() {
-	u.server.POST("/user/auth/register", u.register)
-	u.server.POST("/user/auth/login", u.login)
-	u.server.POST("/user/auth/logout", u.logout)
-	u.server.POST("/user/auth/refresh-token", u.refreshToken)
+	u.publicRoute.Post("/user/auth/register", u.register)
+	u.publicRoute.Post("/user/auth/login", u.login)
+	u.publicRoute.Post("/user/auth/logout", u.logout)
+	u.publicRoute.Post("/user/auth/refresh-token", u.refreshToken)
 }
 
 func (u *AuthApi) register(w http.ResponseWriter, r *http.Request) {

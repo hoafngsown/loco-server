@@ -13,5 +13,4 @@ func TestExamplePlayGround(t *testing.T) {
 		Name: "test",
 	})
 
-	t.Log("Hello, playground!")
 }

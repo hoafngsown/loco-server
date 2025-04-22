@@ -2,7 +2,6 @@ package example_server_app
 
 import (
 	"database/sql"
-	"net/http"
 	auth_api "rz-server/internal/app/user/api/auth"
 	auth_service "rz-server/internal/app/user/application/auth"
 	"rz-server/internal/app/user/domain/auth"
@@ -10,7 +9,6 @@ import (
 	auth_sql_store "rz-server/internal/app/user/infra/store/sql/auth"
 	user_sql_store "rz-server/internal/app/user/infra/store/sql/user"
 	"rz-server/internal/common/interfaces"
-	"rz-server/internal/common/middlewares"
 )
 
 var _ interfaces.ServerApp = (*ServerApp)(nil)
@@ -33,10 +31,6 @@ func New(cmd *interfaces.CMD) *ServerApp {
 
 func (userApp *ServerApp) RegisterAPI() error {
 	repository := sql_store.NewRepository(userApp.sqlDB, userApp.util)
-
-	userApp.server.RegisterMiddlewares([]func(http.Handler) http.Handler{
-		middlewares.NewLoggingMiddleware(userApp.util.Log),
-	})
 
 	auth_store := auth_sql_store.New(repository)
 	user_store := user_sql_store.New(repository)

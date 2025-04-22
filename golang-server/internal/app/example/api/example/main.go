@@ -12,7 +12,7 @@ import (
 type ExampleApi struct {
 	service application.ExampleService
 	util    *interfaces.Util
-	server  interfaces.Server
+	*ExampleRouting
 }
 
 func New(
@@ -23,13 +23,13 @@ func New(
 	u := new(ExampleApi)
 	u.service = service
 	u.util = util
-	u.server = server
+	u.ExampleRouting = NewRoutingSetup(server, util, service)
 
 	return u
 }
 
 func (u *ExampleApi) Register() {
-	u.server.POST("/example", u.createExample)
+	u.publicRoute.Get("/example", u.createExample)
 }
 
 func (u *ExampleApi) createExample(w http.ResponseWriter, r *http.Request) {
