@@ -14,3 +14,6 @@ type Auth interface {
 	ValidateExpired(expiredAt time.Time) error
 	GetExpiredAtAfter() time.Time
 }
+
+type User interface {
+}

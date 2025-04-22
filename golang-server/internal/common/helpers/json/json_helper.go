@@ -19,6 +19,16 @@ func ParseJson[T any](r *http.Request) (T, error) {
 	return t, err
 }
 
+func ToJSON(v any) []byte {
+	json, err := json.Marshal(v)
+
+	if err != nil {
+		return nil
+	}
+
+	return json
+}
+
 func RespondJsonError(err interfaces.ApplicationError, w http.ResponseWriter) {
 	statusError := map[application_error.ErrorType]int{
 		application_error.BusinessError:   http.StatusUnprocessableEntity,

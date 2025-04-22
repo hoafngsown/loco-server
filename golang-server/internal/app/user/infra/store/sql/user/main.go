@@ -7,6 +7,8 @@ import (
 	user_store_data "rz-server/internal/app/user/infra/store/sql/user/data"
 
 	repository "rz-server/internal/app/user/infra/store/sql/repository"
+
+	"github.com/google/uuid"
 )
 
 var _ store.UserStore = (*UserStore)(nil)
@@ -43,4 +45,17 @@ func (s *UserStore) GetUserByEmail(email string) *user_store_data.Data {
 	}
 
 	return user_store_data.New(user.ID, user.DisplayName, user.Email, user.Password)
+}
+
+func (s *UserStore) MarkSetupCompleted(userID uuid.UUID, Preference []byte) error {
+	err := s.Queries.MarkSetupCompleted(context.Background(), repository.MarkSetupCompletedParams{
+		ID:         userID,
+		Preference: Preference,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

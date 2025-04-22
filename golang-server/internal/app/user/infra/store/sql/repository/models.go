@@ -5,16 +5,60 @@
 package repository
 
 import (
+	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
 
+type PreferenceType string
+
+const (
+	PreferenceTypeVibe  PreferenceType = "vibe"
+	PreferenceTypeStyle PreferenceType = "style"
+)
+
+func (e *PreferenceType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PreferenceType(s)
+	case string:
+		*e = PreferenceType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PreferenceType: %T", src)
+	}
+	return nil
+}
+
+type NullPreferenceType struct {
+	PreferenceType PreferenceType
+	Valid          bool // Valid is true if PreferenceType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPreferenceType) Scan(value interface{}) error {
+	if value == nil {
+		ns.PreferenceType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PreferenceType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPreferenceType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PreferenceType), nil
+}
+
 type PreferenceMetadatum struct {
 	ID        uuid.UUID
 	Key       string
-	Type      string
+	Type      PreferenceType
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -29,11 +73,12 @@ type RefreshToken struct {
 }
 
 type User struct {
-	ID          uuid.UUID
-	Email       string
-	Password    string
-	DisplayName string
-	Preferences json.RawMessage
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID                uuid.UUID
+	Email             string
+	Password          string
+	DisplayName       string
+	Preference        json.RawMessage
+	HasCompletedSetup bool
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }

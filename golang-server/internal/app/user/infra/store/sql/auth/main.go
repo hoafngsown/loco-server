@@ -23,7 +23,7 @@ func New(store *sql_store.Repository) *AuthStore {
 	}
 }
 
-func (s *AuthStore) SaveRefreshToken(body auth_store_data.RefreshTokenBody) auth_store_data.Data {
+func (s *AuthStore) SaveRefreshToken(body auth_store_data.RefreshTokenBody) *auth_store_data.Data {
 	auth, err := s.Queries.SaveRefreshToken(context.Background(), repository.SaveRefreshTokenParams{
 		UserID:    body.UserID,
 		Token:     body.Token,
@@ -31,10 +31,15 @@ func (s *AuthStore) SaveRefreshToken(body auth_store_data.RefreshTokenBody) auth
 	})
 
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
-	return auth_store_data.New(auth.ID, auth.UserID, auth.Token, auth.ExpiredAt)
+	return &auth_store_data.Data{
+		ID:       auth.ID,
+		UserID:   auth.UserID,
+		Token:    auth.Token,
+		ExpireAt: auth.ExpiredAt,
+	}
 }
 
 func (s *AuthStore) UpdateRefreshTokenExpiredAt(id uuid.UUID, expiredAt time.Time) error {
